@@ -14,13 +14,17 @@ export function SignIn() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const { user, isAuthenticated } = useAuthContext();
+  const { signIn } = useAuthContext();
 
-  function handleLoginSubmit() {
+  async function handleLoginSubmit(): Promise<void> {
     if (email === "" || password === "") {
       return;
     }
-    console.log("Hello world");
+
+    await signIn({
+      email,
+      password,
+    });
   }
 
   return (
