@@ -2,19 +2,20 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   Image,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 
 import { useAuthContext } from "../../hooks/useAuthContext";
+import { styles } from "./styles";
 
 export function SignIn() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const { signIn } = useAuthContext();
+  const { signIn, loadingAuth } = useAuthContext();
 
   async function handleLoginSubmit(): Promise<void> {
     if (email === "" || password === "") {
@@ -48,49 +49,13 @@ export function SignIn() {
           onChangeText={setPassword}
         />
         <TouchableOpacity style={styles.button} onPress={handleLoginSubmit}>
-          <Text style={styles.buttonText}>ACESSAR</Text>
+          {loadingAuth ? (
+            <ActivityIndicator size={25} color="#FFF" />
+          ) : (
+            <Text style={styles.buttonText}>ACESSAR</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1D1D2E",
-  },
-  logo: {
-    marginBottom: 18,
-  },
-  inputContainer: {
-    width: "95%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 34,
-    paddingHorizontal: 14,
-  },
-  input: {
-    width: "95%",
-    height: 40,
-    backgroundColor: "#101026",
-    marginBottom: 12,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    color: "#FFF",
-  },
-  button: {
-    width: "95%",
-    height: 40,
-    backgroundColor: "#3FFFA3",
-    borderRadius: 4,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    fontWeight: "bold",
-    color: "#101026",
-  },
-});
