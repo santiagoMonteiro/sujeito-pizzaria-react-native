@@ -7,9 +7,9 @@ import { AuthRoutes } from "./auth.routes";
 import { useAuthContext } from "../hooks/useAuthContext";
 
 export function Routes() {
-  const { isAuthenticated, loadingOfflineData } = useAuthContext();
+  const { isAuthenticated, isLoadingOfflineData } = useAuthContext();
 
-  if (loadingOfflineData) {
+  if (isLoadingOfflineData) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size={60} color="#F5F7FB" />

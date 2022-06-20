@@ -7,8 +7,8 @@ type AuthContextData = {
   isAuthenticated: boolean;
   signIn: (credentials: SignInParams) => Promise<void>;
   signOut: () => Promise<void>;
-  loadingAuth: boolean;
-  loadingOfflineData: boolean;
+  isLoadingAuth: boolean;
+  isLoadingOfflineData: boolean;
 };
 
 type User = {
@@ -38,8 +38,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!user.name);
-  const [loadingAuth, setLoadingAuth] = useState<boolean>(false);
-  const [loadingOfflineData, setLoadingOfflineData] = useState<boolean>(true);
+  const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(false);
+  const [isLoadingOfflineData, setIsLoadingOfflineData] = useState<boolean>(true);
 
   useEffect(() => {
     async function getUserOfflineData(): Promise<void> {
@@ -60,14 +60,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         setIsAuthenticated(true);
       }
-      setLoadingOfflineData(false);
+      setIsLoadingOfflineData(false);
     }
 
     getUserOfflineData();
   }, []);
 
   async function signIn({ email, password }: SignInParams): Promise<void> {
-    setLoadingAuth(true);
+    setIsLoadingAuth(true);
     try {
       const response = await api.post("/session", {
         email,
@@ -87,10 +87,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setUser(authenticatedUserData);
       setIsAuthenticated(true);
-      setLoadingAuth(false);
+      setIsLoadingAuth(false);
     } catch (err) {
       console.log("Erro ao acessar", err);
-      setLoadingAuth(false);
+      setIsLoadingAuth(false);
     }
   }
 
@@ -114,8 +114,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated,
         signIn,
         signOut,
-        loadingAuth,
-        loadingOfflineData,
+        isLoadingAuth,
+        isLoadingOfflineData,
       }}
     >
       {children}

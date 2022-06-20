@@ -1,5 +1,4 @@
-import { StatusBar, View } from "react-native";
-import { SignIn } from "./src/pages/SignIn";
+import { StatusBar } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { Routes } from "./src/routes";

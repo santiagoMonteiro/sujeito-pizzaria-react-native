@@ -15,7 +15,7 @@ export function SignIn() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const { signIn, loadingAuth } = useAuthContext();
+  const { signIn, isLoadingAuth } = useAuthContext();
 
   async function handleLoginSubmit(): Promise<void> {
     if (email === "" || password === "") {
@@ -49,7 +49,7 @@ export function SignIn() {
           onChangeText={setPassword}
         />
         <TouchableOpacity style={styles.button} onPress={handleLoginSubmit}>
-          {loadingAuth ? (
+          {isLoadingAuth ? (
             <ActivityIndicator size={25} color="#FFF" />
           ) : (
             <Text style={styles.buttonText}>ACESSAR</Text>

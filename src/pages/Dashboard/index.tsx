@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Text,
-  SafeAreaView,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
+import { Text, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
 
 import { useAuthContext } from "../../hooks/useAuthContext";
 
@@ -13,12 +8,11 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StackParamsList } from "../../routes/app.routes";
 
 import { styles } from "./styles";
+import { api } from "../../services/api";
 
 export function Dashboard() {
   const navigation =
     useNavigation<NativeStackNavigationProp<StackParamsList>>();
-
-  const { signOut } = useAuthContext();
 
   const [tableNumber, setTableNumber] = useState<string>("");
 
@@ -27,10 +21,18 @@ export function Dashboard() {
       return;
     }
 
+    const response = await api.post("/order", {
+      table: Number(tableNumber),
+    });
+
+    const { id } = response.data;
+
     navigation.navigate("Order", {
       table: tableNumber,
-      id: "123"
+      id,
     });
+
+    setTableNumber("");
   }
 
   return (
