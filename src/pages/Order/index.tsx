@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, TextInput, Modal } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  FlatList,
+} from "react-native";
 
 import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 
@@ -7,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { api } from "../../services/api";
 import { ModalPicker } from "../../components/ModalPicker";
+import { ListItem } from "../../components/ListItem";
 
 type RouteDetailParams = {
   Order: {
@@ -27,6 +35,13 @@ type Product = {
   name: string;
 };
 
+type Item = {
+  id: string;
+  product_id: string;
+  name: string;
+  amount: string | number;
+};
+
 export function Order() {
   const route = useRoute<OrderRouteProps>();
   const navigation = useNavigation();
@@ -42,9 +57,10 @@ export function Order() {
     useState<boolean>(false);
 
   const [itemsAmount, setItemsAmount] = useState<string>("1");
+  const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
-    async function loadCategories() {
+    async function loadCategories(): Promise<void> {
       const response = await api.get("/category");
 
       setCategories(response.data);
@@ -54,7 +70,7 @@ export function Order() {
   }, []);
 
   useEffect(() => {
-    async function loadProducts() {
+    async function loadProducts(): Promise<void> {
       const response = await api.get("/category/product", {
         params: {
           category_id: selectedCategory?.id,
@@ -68,7 +84,7 @@ export function Order() {
     loadProducts();
   }, [selectedCategory]);
 
-  async function handleCloseOrder() {
+  async function handleCloseOrder(): Promise<void> {
     try {
       await api.delete("/order", {
         params: {
@@ -82,13 +98,44 @@ export function Order() {
     }
   }
 
+  async function handleAddItem(): Promise<void> {
+    const response = await api.post("/order/add", {
+      order_id: route.params?.id,
+      product_id: selectedProduct?.id,
+      amount: Number(itemsAmount),
+    });
+
+    const data = {
+      id: response.data.id,
+      product_id: selectedProduct?.id as string,
+      name: selectedProduct?.name as string,
+      amount: itemsAmount,
+    };
+
+    setItems([...items, data]);
+  }
+
+  async function handleDeleteItem(item_id: string): Promise<void> {
+    await api.delete("/order/remove", {
+      params: {
+        item_id,
+      },
+    });
+
+    const updatedItems = items.filter((item) => item.id !== item_id);
+
+    setItems(updatedItems);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Mesa {route.params.table}</Text>
-        <TouchableOpacity onPress={handleCloseOrder}>
-          <Feather name="trash-2" size={28} color="#ff3f4b" />
-        </TouchableOpacity>
+        {items.length === 0 && (
+          <TouchableOpacity onPress={handleCloseOrder}>
+            <Feather name="trash-2" size={28} color="#ff3f4b" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {categories.length !== 0 && (
@@ -122,14 +169,32 @@ export function Order() {
       </View>
 
       <View style={styles.actionsContainer}>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.forwardButton}>
+        <TouchableOpacity
+          style={[
+            styles.forwardButton,
+            {
+              opacity: items.length === 0 ? 0.3 : 1,
+            },
+          ]}
+          disabled={items.length === 0}
+        >
           <Text style={styles.buttonText}>Avançar</Text>
         </TouchableOpacity>
       </View>
+
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        style={styles.flatlist}
+        data={items}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <ListItem data={item} deleteItem={handleDeleteItem} />
+        )}
+      />
 
       <Modal
         transparent={true}
@@ -140,6 +205,18 @@ export function Order() {
           options={categories}
           handleCloseModal={() => setCategoryModalVisibility(false)}
           selectedItem={setSelectedCategory}
+        />
+      </Modal>
+
+      <Modal
+        transparent={true}
+        visible={productModalVisibility}
+        animationType="fade"
+      >
+        <ModalPicker
+          options={products}
+          handleCloseModal={() => setProductModalVisibility(false)}
+          selectedItem={setSelectedProduct}
         />
       </Modal>
     </View>

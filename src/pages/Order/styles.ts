@@ -74,4 +74,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  flatlist: {
+    flex: 1,
+    marginTop: 24,
+  }
 });
