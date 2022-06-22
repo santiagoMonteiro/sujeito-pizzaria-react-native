@@ -16,6 +16,9 @@ import { api } from "../../services/api";
 import { ModalPicker } from "../../components/ModalPicker";
 import { ListItem } from "../../components/ListItem";
 
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StackParamsList } from "../../routes/app.routes";
+
 type RouteDetailParams = {
   Order: {
     id: string;
@@ -44,7 +47,8 @@ type Item = {
 
 export function Order() {
   const route = useRoute<OrderRouteProps>();
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<StackParamsList>>();
 
   const [categories, setCategories] = useState<Category[] | []>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
@@ -113,6 +117,7 @@ export function Order() {
     };
 
     setItems([...items, data]);
+    setItemsAmount("1");
   }
 
   async function handleDeleteItem(item_id: string): Promise<void> {
@@ -125,6 +130,13 @@ export function Order() {
     const updatedItems = items.filter((item) => item.id !== item_id);
 
     setItems(updatedItems);
+  }
+
+  function handleRedirectToFinishPage() {
+    navigation.navigate("FinishOrder", {
+      table: route.params?.table,
+      order_id: route.params?.id,
+    });
   }
 
   return (
@@ -181,6 +193,7 @@ export function Order() {
             },
           ]}
           disabled={items.length === 0}
+          onPress={handleRedirectToFinishPage}
         >
           <Text style={styles.buttonText}>Avançar</Text>
         </TouchableOpacity>
